@@ -1,5 +1,6 @@
 import pygame as pg
 import random
+import math
 
 #Settings
 winx = 700
@@ -29,15 +30,45 @@ class Enemy:
     self.y = y
     self.size = size
     self.speed = speed
+    self.hp = hp
   
   def chase(self, player):
     self.x += (player.x - self.x) * self.speed
     self.y += (player.y - self.y) * self.speed
+    
+class Bullet:
+  def __init__(self, x, y, mousePos, speed, damage):
+        self.x = x
+        self.y = y
+        self.mousePos = mousePos
+        self.speed = speed
+        self.damage = damage
+
+        direction_x = mousePos[0] - x
+        direction_y = mousePos[1] - y
+
+        magnitude = math.sqrt(direction_x ** 2 + direction_y ** 2)
+        self.dir_x = direction_x / magnitude
+        self.dir_y = direction_y / magnitude
+        
+  def move(self):
+      # Move the bullet in the direction of the mouse position
+      self.x += self.dir_x * self.speed
+      self.y += self.dir_y * self.speed
             
 
 player = Player()
 
 enemies = []
+
+bullets = []
+shootCooldown = 30
+cooldownTimer = 0
+
+#SHOOT
+def shoot():
+  newBullet = Bullet(player.x, player.y, pg.mouse.get_pos(), 15, 1)
+  bullets.append(newBullet)
 
 #SPAWNER
 time = 0
@@ -51,6 +82,9 @@ while game:
   display.fill("White")
   pg.time.Clock().tick(FPS)
   
+  cooldownTimer += 1
+  
+  enteties = [enemies, bullets]
   
   #SPAWNER
   if time <= 60 * spawnRate:
@@ -69,23 +103,48 @@ while game:
   keys = pg.key.get_pressed()
   
   if keys[pg.K_w]:
-    for e in enemies:
-      e.y += player.speed
+    for e in enteties:
+      for i in e:
+        i.y += player.speed
   if keys[pg.K_s]:
-    for e in enemies:
-      e.y -= player.speed
+    for e in enteties:
+      for i in e:
+        i.y -= player.speed
   if keys[pg.K_a]:
-    for e in enemies:
-      e.x += player.speed
+    for e in enteties:
+      for i in e:
+        i.x += player.speed
   if keys[pg.K_d]:
-    for e in enemies:
-      e.x -= player.speed
+    for e in enteties:
+      for i in e:
+        i.x -= player.speed
+  if keys[pg.K_SPACE]:
+    if cooldownTimer >= shootCooldown:
+      shoot()
+      cooldownTimer = 0
   
   #ENEMIES
   for enemy in enemies:
     enemy.chase(player)
-    pg.draw.circle(display, enemy.color, (enemy.x, enemy.y), enemy.size)
+    pg.draw.circle(display, (0, abs(enemy.hp * 80), 0), (enemy.x, enemy.y), enemy.size) 
+    
+  #BULLETS
+  for bullet in bullets:
+    bullet.move()
+    pg.draw.circle(display, "blue", (bullet.x, bullet.y), 10)
+    #COLLISION
+    for enemy in enemies:
+      if enemy.x <= bullet.x and enemy.x + 35 >= bullet.x and enemy.y <= bullet.y and enemy.y + 35 >= bullet.y:
+        bulletInList = bullets.index(bullet)
+        enemyInList = enemies.index(enemy)
+        
+        if bullets[bulletInList]:
+          bullets.pop(bulletInList)
+        if enemies[enemyInList]:
+          enemies[enemyInList].hp -= bullet.damage
+          if enemies[enemyInList].hp <= 0:
+            enemies.pop(enemyInList)
+          
   
   pg.draw.circle(display, "yellow", (player.x, player.y), 25)
   pg.display.update()
-  #TEST
