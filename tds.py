@@ -88,3 +88,4 @@ while game:
   
   pg.draw.circle(display, "yellow", (player.x, player.y), 25)
   pg.display.update()
+  #TEST
