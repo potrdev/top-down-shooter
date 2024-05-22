@@ -55,6 +55,7 @@ class Bullet:
       # Move the bullet in the direction of the mouse position
       self.x += self.dir_x * self.speed
       self.y += self.dir_y * self.speed
+    
             
 
 player = Player()
@@ -103,18 +104,22 @@ while game:
   keys = pg.key.get_pressed()
   
   if keys[pg.K_w]:
+    backgroundPos[1] += player.speed
     for e in enteties:
       for i in e:
         i.y += player.speed
   if keys[pg.K_s]:
+    backgroundPos[1] -= player.speed
     for e in enteties:
       for i in e:
         i.y -= player.speed
   if keys[pg.K_a]:
+    backgroundPos[0] += player.speed
     for e in enteties:
       for i in e:
         i.x += player.speed
   if keys[pg.K_d]:
+    backgroundPos[0] -= player.speed
     for e in enteties:
       for i in e:
         i.x -= player.speed
@@ -134,7 +139,7 @@ while game:
     pg.draw.circle(display, "blue", (bullet.x, bullet.y), 10)
     #COLLISION
     for enemy in enemies:
-      if enemy.x <= bullet.x and enemy.x + 35 >= bullet.x and enemy.y <= bullet.y and enemy.y + 35 >= bullet.y:
+      if enemy.x <= bullet.x and enemy.x + 45 >= bullet.x and enemy.y <= bullet.y and enemy.y + 45 >= bullet.y:
         bulletInList = bullets.index(bullet)
         enemyInList = enemies.index(enemy)
         
