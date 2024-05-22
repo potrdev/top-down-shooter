@@ -7,6 +7,10 @@ winx = 700
 winy = 700
 FPS = 60
 
+#IMAGES
+bulletImage = pg.image.load("bullet.png")
+enemyImage = pg.image.load("enemy.png")
+
 #FUNCTIONS
 def randomSpawn():
   if random.randint(1,2) == 1:
@@ -31,6 +35,8 @@ class Enemy:
     self.size = size
     self.speed = speed
     self.hp = hp
+    self.image = pg.transform.scale(enemyImage, (35,35))
+
   
   def chase(self, player):
     self.x += (player.x - self.x) * self.speed
@@ -43,6 +49,7 @@ class Bullet:
         self.mousePos = mousePos
         self.speed = speed
         self.damage = damage
+        self.image = pg.transform.scale(bulletImage, (24, 24))
 
         direction_x = mousePos[0] - x
         direction_y = mousePos[1] - y
@@ -63,7 +70,7 @@ player = Player()
 enemies = []
 
 bullets = []
-shootCooldown = 30
+shootCooldown = 15
 cooldownTimer = 0
 
 #SHOOT
@@ -72,15 +79,19 @@ def shoot():
   bullets.append(newBullet)
 
 #SPAWNER
-time = 0
-spawnRate = 2
+time = 0.5
+spawnRate = 1
 
 #GAME
 display = pg.display.set_mode((winx, winy))
 game = True
 
+#COLORS
+playerColor = "#57476e"
+bulletColor = "#8a77a6"
+
 while game:
-  display.fill("White")
+  display.fill("#958ba3")
   pg.time.Clock().tick(FPS)
   
   cooldownTimer += 1
@@ -104,22 +115,18 @@ while game:
   keys = pg.key.get_pressed()
   
   if keys[pg.K_w]:
-    backgroundPos[1] += player.speed
     for e in enteties:
       for i in e:
         i.y += player.speed
   if keys[pg.K_s]:
-    backgroundPos[1] -= player.speed
     for e in enteties:
       for i in e:
         i.y -= player.speed
   if keys[pg.K_a]:
-    backgroundPos[0] += player.speed
     for e in enteties:
       for i in e:
         i.x += player.speed
   if keys[pg.K_d]:
-    backgroundPos[0] -= player.speed
     for e in enteties:
       for i in e:
         i.x -= player.speed
@@ -131,13 +138,16 @@ while game:
   #ENEMIES
   for enemy in enemies:
     enemy.chase(player)
-    pg.draw.circle(display, (0, abs(enemy.hp * 80), 0), (enemy.x, enemy.y), enemy.size) 
+    display.blit(enemy.image, (enemy.x, enemy.y))
+    pg.draw.rect(display, "green", (enemy.x, enemy.y - 20, 10,30))
+    #pg.draw.circle(display, (0, abs(enemy.hp * 80), 0), (enemy.x, enemy.y), enemy.size) 
     
   #BULLETS
   for bullet in bullets:
     bullet.move()
-    pg.draw.circle(display, "blue", (bullet.x, bullet.y), 10)
+    #pg.draw.circle(display, bulletColor, (bullet.x, bullet.y), 10)
     #COLLISION
+    display.blit(bullet.image, (bullet.x, bullet.y))
     for enemy in enemies:
       if enemy.x <= bullet.x and enemy.x + 45 >= bullet.x and enemy.y <= bullet.y and enemy.y + 45 >= bullet.y:
         bulletInList = bullets.index(bullet)
@@ -151,5 +161,5 @@ while game:
             enemies.pop(enemyInList)
           
   
-  pg.draw.circle(display, "yellow", (player.x, player.y), 25)
+  pg.draw.circle(display, playerColor, (player.x, player.y), 25)
   pg.display.update()
