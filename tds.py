@@ -119,7 +119,7 @@ while game:
   enteties = [enemies, bullets]
   
   if player.hp <= 0:
-    loseText = font.render("You died!", True, "white", None)
+    loseText = font.render("Vmru si!", True, "white", None)
     display.blit(pg.transform.scale(loseText, (220, 50)), (winx // 2 - 70, winy // 2 - 20))
     pg.display.update()
     t.sleep(4)
